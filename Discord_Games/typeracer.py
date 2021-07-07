@@ -9,7 +9,7 @@ import discord
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from discord.ext import commands
-from typing import Union, Optional
+from typing import Union, Optional, List
 from datetime import datetime as dt
 
 
@@ -50,6 +50,8 @@ class TypeRacer:
         'sea', 'draw', 'left', 'late', 'run', "don't", 'while', 'press', 'close',
         'night', 'real', 'life', 'few', 'north'
     )
+    def __init__(self, players: Optional[List[discord.Member]] = None):
+        self.players = players
 
     def _tr_img(self, text: str, font: str) -> BytesIO:
         text = "\n".join(textwrap.wrap(text, width=25))
@@ -83,8 +85,14 @@ class TypeRacer:
             def check(m):
                 content = m.content.lower().replace("\n", " ")
                 if m.channel == ctx.channel and not m.author.bot and m.author not in map(lambda m: m["user"], winners):
+                    if self.players:
+                        if m.author not in self.players:
+                            return False
+                        
                     sim = difflib.SequenceMatcher(None, content, text).ratio()
                     return sim >= 0.9
+                
+                return False
 
             try:
                 message = await ctx.bot.wait_for(
