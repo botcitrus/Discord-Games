@@ -117,20 +117,12 @@ class TypeRacer:
             if len(winners) >= 3:
                 break
         
-        desc = [format_line(i, x) for i, x in enumerate(winners, 1)]
-        embed = discord.Embed(
-            title = "Typerace results",
-            color = 0x2F3136, 
-            timestamp = dt.utcnow()
-        )
-        embed.add_field(name="Winners", value="\n".join(desc))
-
-        await ctx.reply(embed=embed, allowed_mentions=discord.AllowedMentions.none())
-        return True
+        return winners
 
     async def start(
         self, 
         ctx: commands.Context, *, 
+        embed: Optional[discord.Embed] = None
         embed_title: Optional[str] = "Type the following sentence in the chat now!", 
         embed_color: Optional[Union[discord.Color, int]] = discord.Color.greyple(), 
         path_to_text_font: Optional[str] = "arial.ttf",
@@ -154,7 +146,7 @@ class TypeRacer:
 
         buffer = await ctx.bot.loop.run_in_executor(None, self._tr_img, text, path_to_text_font)
 
-        embed = discord.Embed(
+        embed = embed or discord.Embed(
             title = embed_title,
             color = embed_color, 
             timestamp = dt.utcnow()
@@ -170,5 +162,5 @@ class TypeRacer:
             file = discord.File(buffer, "tr.png")
         )
 
-        await self.wait_for_tr_response(ctx, text, timeout=timeout)
-        return True
+        x = await self.wait_for_tr_response(ctx, text, timeout=timeout)
+        return x
